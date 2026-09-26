@@ -1,0 +1,23 @@
+{
+  "name": "dust-creek",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A choose-your-own-adventure western, every picture drawn in code with anidoodle.",
+  "scripts": {
+    "dev": "esbuild src/app/main.ts --bundle --outfile=www/app.js --servedir=www --serve=5180",
+    "build": "esbuild src/app/main.ts --bundle --minify --outfile=www/app.js",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "still": "node tools/still.mjs",
+    "gate": "node tools/gate.mjs"
+  },
+  "dependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "playwright-core": "^1.48.0",
+    "typescript": "^5.9.0"
+  }
+}
