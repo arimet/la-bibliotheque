@@ -3,19 +3,17 @@
 // live films would bring a phone to its knees.
 import type { PageFilm } from "../canvas-core/west";
 import { play, still } from "./player";
-import { PAGES, type Page } from "./story";
+import { ROMAN, toneOf, type Book, type Page } from "./book";
 
-const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
-
-export const gallery = (root: HTMLElement, filmFor: (p: Page) => PageFilm) => {
+export const gallery = (root: HTMLElement, book: Book, filmFor: (p: Page) => PageFilm) => {
   const k = Math.min(2, devicePixelRatio || 1), scale = Math.min(0.9, (Math.min(innerWidth, 520) * k) / 1600);
   let playing: { stop: () => void; canvas: HTMLCanvasElement; film: PageFilm } | null = null;
   const rest = () => { if (!playing) return; playing.stop(); still(playing.canvas, playing.film, scale); playing = null; };
-  root.innerHTML = `<header><h1>Dust Creek</h1><p>Toutes les scènes. <span class="hover">Survole une image pour la voir se dessiner, clique pour l'ouvrir dans le livre.</span><span class="touch">Touche une image pour la voir se dessiner, touche-la encore pour l'ouvrir dans le livre.</span></p><a href="#p01">Commencer l'histoire</a></header><div class="grid"></div>`;
+  root.innerHTML = `<header><h1>${book.name}</h1><p>Toutes les scènes. <span class="hover">Survole une image pour la voir se dessiner, clique pour l'ouvrir dans le livre.</span><span class="touch">Touche une image pour la voir se dessiner, touche-la encore pour l'ouvrir dans le livre.</span></p><a href="#${book.start}">Commencer l'histoire</a></header><div class="grid"></div>`;
   const grid = root.querySelector(".grid")!;
-  const tiles = PAGES.map((p) => {
+  const tiles = book.pages.map((p) => {
     const a = document.createElement("a"), canvas = document.createElement("canvas");
-    a.className = "tile" + ((p.blue ?? 0) >= 0.5 ? " blue" : ""); a.href = "#" + p.id;
+    a.className = "tile tone-" + toneOf(p); a.href = "#" + p.id;
     a.innerHTML = `<span class="num">${ROMAN[p.n]}</span><span class="ttl">${p.title}</span>${p.ending ? `<span class="end">fin</span>` : ""}`;
     a.prepend(canvas); grid.append(a);
     const start = () => { if (playing?.canvas === canvas) return; rest(); const film = filmFor(p); playing = { stop: play(canvas, film, () => {}, scale).stop, canvas, film }; };

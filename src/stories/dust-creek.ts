@@ -1,7 +1,6 @@
-// The whole book as data. No imports: the story graph test reads this file on its own.
+// The whole book as data. Only a type import: the story graph test reads this file with plain Node.
+import type { Book, Page } from "../app/book";
 export type Item = "revolver" | "lanterne" | "etoile" | "cristal";
-export type Choice = { to: string; label: string; card?: string; needs?: Item };
-export type Page = { id: string; n: number; title: string; text: string[]; gives?: Item; blue?: number; ending?: boolean; choices: Choice[] };
 
 export const START = "p01";
 export const START_ITEMS: Item[] = ["revolver"];
@@ -33,40 +32,40 @@ export const PAGES: Page[] = [
     "Sous le carnet, il y a son étoile de shérif, posée sur un éclat de verre bleu pas plus gros qu'un ongle. Le laiton est tiède, alors que la pièce est froide. Tu prends l'étoile. C'est à ce moment-là qu'une détonation fait trembler les vitres.",
   ], choices: [{ to: "p04", label: "Courir dehors" }] },
 
-  { id: "p04", n: 4, title: "La Chute", blue: 0.2, text: [
+  { id: "p04", n: 4, title: "La Chute", tone: 0.2, text: [
     "Dehors, sur la crête de la mesa, il y a des torches : une demi-douzaine de cavaliers. Deux éclairs de carabine partent vers le ciel, et le bruit n'arrive qu'une seconde plus tard.",
     "Au-dessus d'eux, une lumière bleue, énorme, se met à tomber. Elle traverse les étoiles sans le moindre bruit et disparaît derrière les rochers. Le sol tremble sous tes bottes, et toutes les lampes de Dust Creek s'éteignent en même temps. Là-haut, une lueur se met à battre, lentement, avec des ratés.",
     "Sur la crête, les torches se mettent en marche vers l'endroit où la lumière est tombée : ceux qui ont tiré vont chercher ce qu'ils ont abattu. Tu ne les rattraperas pas par la piste.",
     "Mais la même lueur bleue sort aussi de l'entrée de la vieille mine, au pied de la mesa. Les galeries doivent monter jusque là-haut.",
   ], choices: [{ to: "p05", label: "Grimper vers la lueur" }, { to: "p06", label: "Descendre dans la mine" }] },
 
-  { id: "p05", n: 5, title: "Le Cratère", gives: "cristal", blue: 0.5, text: [
+  { id: "p05", n: 5, title: "Le Cratère", gives: "cristal", tone: 0.5, text: [
     "Ce n'est pas une météorite. Les météorites n'ont pas de porte.",
     "Au fond du cratère, le sable a fondu en verre, et il craque sous tes bottes. L'engin est planté du nez dans la roche : lisse, sans un rivet ni une vis, aussi long qu'une diligence. Une trappe ovale est ouverte sur le flanc, et la lumière à l'intérieur baisse et remonte, régulièrement.",
     "À tes pieds, un éclat de cristal bleu bat au même rythme. Quand tu approches la main, il bat plus vite. Il est tiède. Tu le ramasses.",
     "Des traînées partent de la trappe vers les rochers : ce qui était à bord est blessé, et s'est mis à l'abri. Plus bas, sur la piste, les torches des cavaliers montent vers toi.",
   ], choices: [{ to: "p07", label: "Suivre les traces" }, { to: "p08", label: "Attendre les cavaliers" }] },
 
-  { id: "p06", n: 6, title: "La Mine", blue: 0.5, text: [
+  { id: "p06", n: 6, title: "La Mine", tone: 0.5, text: [
     "La galerie descend dans le noir, et l'air a un goût de fer et d'orage. Les étais sont neufs, les rails aussi. <em>Pour une mine morte, on y travaille beaucoup la nuit.</em>",
     "Tout au fond, une lumière bleue court le long des rails. Elle ne descend pas : elle remonte la pente vers toi. Avec elle vient une respiration, lente et profonde, beaucoup trop profonde pour un homme.",
     "Sans lumière, tu ne feras pas dix pas sans te rompre le cou. Et tu n'as aucune envie que ce qui respire en bas t'entende tomber.",
   ], choices: [{ to: "p07", label: "Allumer la lanterne", needs: "lanterne" }, { to: "p08", label: "Remonter à l'air libre" }] },
 
-  { id: "p07", n: 7, title: "Le Pilote", blue: 1, text: [
+  { id: "p07", n: 7, title: "Le Pilote", tone: 1, text: [
     "Il est adossé à la roche, une main plaquée sur le flanc, et une lumière pâle filtre entre ses doigts. Il est grand, beaucoup trop mince, et sa peau grise est presque transparente : tu devines la roche derrière son épaule. Quand il lève la tête vers toi, ses yeux s'allument.",
     "Il n'a pas de bouche. Les images arrivent quand même, directement dans ta tête, et ça fait mal derrière les yeux. Des cristaux posés en ligne dans le noir, des milliers, jusqu'au bout du ciel : c'est la route de son peuple. Des hommes qui les arrachent pour les vendre. Des carabines levées vers lui.",
     "Puis il te montre ce que tu es venu chercher. Il l'a trouvé dans ta tête avant que tu y penses : un puits noyé qu'il a traversé en rampant dans les galeries, et tout au fond, un homme qui garde la tête hors de l'eau, une étoile sur la poitrine. <em>Hollis.</em> Vivant, pour l'instant.",
     "Le pilote montre le ciel, puis tes mains : il lui faut un cristal pour repartir. Sur la piste, les torches approchent.",
   ], choices: [{ to: "p09", label: "Te placer entre lui et les torches" }] },
 
-  { id: "p08", n: 8, title: "Le Gang", blue: 0.6, text: [
+  { id: "p08", n: 8, title: "Le Gang", tone: 0.6, text: [
     "Ils sont six, à cheval, les carabines en travers de la selle. Celui de tête avance au pas : Jeb Callahan. Bel homme, du genre qui sourit trop. Il porte un chapeau gris à bande tressée, celui que décrit l'avis de l'écurie. <em>Le chapeau de Hollis.</em>",
     "« Tu sais ce qui tombe du ciel, l'ami ? De l'argent. Ma mine est morte, et la ville crève avec. L'armée paie ces cailloux au poids de l'or. Et la machine qu'on vient d'abattre, là-haut ? » Il siffle entre ses dents. « Pour ça, elle paiera ce que je demande. »",
     "Il se penche sur l'encolure. « Le shérif voulait tout arrêter. Il est au fond du puits n° 3. Il réfléchit. » Le sourire s'élargit. « Alors, tu montes avec nous et tu prends ta part, ou tu vas réfléchir avec lui. » Derrière lui, sur la mesa, la lueur bleue faiblit, puis se rallume.",
   ], choices: [{ to: "p09", label: "Soutenir son regard" }] },
 
-  { id: "p09", n: 9, title: "Le Face-à-face", blue: 1, text: [
+  { id: "p09", n: 9, title: "Le Face-à-face", tone: 1, text: [
     "Vous êtes au bord du cratère. D'un côté, Callahan et ses hommes, les carabines levées. De l'autre, l'engin planté dans le sable, sa trappe ouverte, et devant la trappe une silhouette grise, trop mince, qui tient à peine debout. Entre les deux, toi.",
     "Le vent tombe d'un coup. Même les torches arrêtent de claquer. Tu entends un cheval mâcher son mors, et c'est à peu près tout.",
     "Callahan crache dans la poussière. « Alors ? »",
@@ -77,14 +76,14 @@ export const PAGES: Page[] = [
     { to: "p12", card: "Le Revolver", label: "Dégainer", needs: "revolver" },
   ] },
 
-  { id: "p10", n: 10, title: "Shérif des deux mondes", blue: 1, ending: true, text: [
+  { id: "p10", n: 10, title: "Shérif des deux mondes", tone: 1, ending: true, text: [
     "Tu épingles l'étoile de Hollis sur ta veste. Le laiton a passé trois jours posé sur un cristal. Pendant une seconde, il ne se passe rien. Puis l'étoile s'allume, d'un bleu si violent que les chevaux reculent, et dans le cratère la trappe s'illumine en réponse.",
     "Les carabines s'abaissent une à une. Ces hommes ont vu ce que la lumière bleue a fait à la roche du cratère, et aucun n'a envie de savoir ce qu'elle ferait à un homme. Callahan épaule quand même. C'est Dutch, son propre contremaître, qui lui arrache la carabine des mains : il a une femme et deux gosses à Dust Creek, et il tient à les revoir.",
     "À l'aube, tu descends au puits n° 3 avec une corde et une lampe. Hollis remonte maigre et grelottant, mais vivant. Il regarde longtemps l'étoile sur ta poitrine, puis il te la laisse. Les caisses de cristaux de Callahan remontent aussi. La nuit suivante, le pilote repart avec, et il les replace un par un sur sa route.",
     "Depuis, chaque soir, une étoile de plus s'allume au-dessus de la mesa. Tu es le shérif, maintenant. C'est toi qui les comptes.",
   ], choices: [] },
 
-  { id: "p11", n: 11, title: "Le Grand Départ", blue: 1, ending: true, text: [
+  { id: "p11", n: 11, title: "Le Grand Départ", tone: 1, ending: true, text: [
     "Tu lèves le cristal. Il s'embrase dans ta main sans te brûler, et dans le cratère, l'engin se met à vibrer. Le pilote te tend sa main longue et grise. Personne ne t'attend nulle part, et il le sait : il a lu en toi. Tu la prends.",
     "La trappe se referme sur vous deux, et le vaisseau quitte le cratère sans un bruit. En bas, les carabines de Callahan tirent dans le vide. Tu vois les éclairs rapetisser, puis tu ne les vois plus.",
     "Le pilote pose deux doigts sur ta tempe, et tu vois une dernière image : Mae et le vieil Ezra qui remontent Hollis du puits n° 3. Il leur a montré, à eux aussi, où chercher. Mae pleure. Ezra fait semblant que non.",
@@ -99,4 +98,4 @@ export const PAGES: Page[] = [
   ], choices: [] },
 ];
 
-export const pageById = (id: string) => PAGES.find((p) => p.id === id);
+export const book: Book = { id: "dust-creek", name: "Dust Creek", start: START, startItems: START_ITEMS, items: ITEMS, pages: PAGES };

@@ -39,7 +39,8 @@ const ease = (p: number) => 1 - (1 - p) * (1 - p);
 export type Stroke = { pts: P[]; w: number; seed: number; op?: number; wob?: number; at: [number, number]; color?: string; hide?: P[][] };
 // `ph` puts washes on separate surfaces so one flooding in cannot uncover another laid later;
 // `clip` cuts a wash in around shapes (the sky around the rooflines), like masking fluid.
-export type Wash = { pts: P[]; color: string; alpha: number; seed: number; pool?: number; at: [number, number]; from?: P; ph?: number; clip?: P[]; hide?: P[][] };
+// `flat` lays the colour on evenly with a clean edge: body colour or gold leaf, not a wet wash.
+export type Wash = { pts: P[]; color: string; alpha: number; seed: number; pool?: number; at: [number, number]; from?: P; ph?: number; clip?: P[]; hide?: P[][]; flat?: boolean };
 
 // Lay strokes out one after another across [a, b], each taking time in proportion to its
 // length, with a little overlap: long strokes are fast, a flurry of short ones takes its time.
@@ -49,12 +50,13 @@ export const seq = (strokes: Omit<Stroke, "at">[], a: number, b: number, overlap
   let t = a;
   return strokes.map((s, i) => { const d = (L[i] / tot) * (b - a), at: [number, number] = [t, t + d]; t += d * (1 - overlap); return { ...s, at, hide: s.hide ?? hide }; });
 };
-// everything except the `hide` shapes: the frame, then each shape as a hole (even-odd)
+// everything except the `hide` shapes: one clip per shape (the frame with that shape as a hole),
+// and clips intersect, so hide shapes may overlap
 export const masked = (g: Gfx, hide: P[][] | undefined, fn: () => void) => {
   if (!hide?.length) return fn();
-  const c = g.cur; c.save(); c.beginPath(); c.rect(-50, -50, W + 100, H + 100);
-  hide.forEach((q) => q.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))));
-  c.clip("evenodd"); fn(); c.restore();
+  const c = g.cur; c.save();
+  hide.forEach((q) => { c.beginPath(); c.rect(-50, -50, W + 100, H + 100); q.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.clip("evenodd"); });
+  fn(); c.restore();
 };
 // a stroke with a fixed pen, for building lists quickly
 export const st = (pts: P[], w: number, seed: number, op = 0.9, wob = 0.8) => ({ pts, w, seed, op, wob });
@@ -101,7 +103,10 @@ export const warm = (env: Env) => {
 
 // A page film, plus `prepare(env, more)`: paint pending washes while `more()` says there is time.
 export type PageFilm = Film & { prepare?: (env: Env, more: () => boolean) => void };
-export const page = (a: PageArt): PageFilm => {
+export const page = (a0: PageArt): PageFilm => {
+  // a hide shape only matters where it overlaps the mark: keep those, so each mark clips as little as it can
+  const near = (hide: P[][] | undefined, pts: P[], pad: number) => { if (!hide) return hide; const b = bounds(pts), k = hide.filter((q) => { const c = bounds(q); return c.x0 < b.x1 + pad && c.x1 > b.x0 - pad && c.y0 < b.y1 + pad && c.y1 > b.y0 - pad; }); return k.length ? k : undefined; };
+  const a: PageArt = { ...a0, strokes: a0.strokes.map((s) => ({ ...s, hide: near(s.hide, s.pts, s.w * 2 + 6) })), washes: a0.washes.map((w) => ({ ...w, hide: near(w.hide, w.pts, 12) })) };
   const paper = a.paper ?? SEPIA.paper, ink = a.ink ?? SEPIA.ink;
   const reach = a.washes.map((w) => { const b = bounds(w.pts), o = w.from ?? [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2]; return { o, R: 1.15 * Math.max(...[[b.x0, b.y0], [b.x1, b.y0], [b.x0, b.y1], [b.x1, b.y1]].map(([x, y]) => Math.hypot(x - o[0], y - o[1]))) }; });
   const spat = a.spatter ? (() => { const r = rng(a.spatter.seed), [x0, y0, x1, y1] = a.spatter.box; return Array.from({ length: a.spatter.n }, (_, i) => { const big = r() < 0.25; return blob(x0 + r() * (x1 - x0), y0 + r() * (y1 - y0), big ? 3.4 : 1.3 + r(), big ? 2.8 : 1.1 + r() * 0.8, a.spatter!.seed + i, 0.3, 8); }); })() : [];
@@ -121,7 +126,7 @@ export const page = (a: PageArt): PageFilm => {
   };
   const paintOne = (env: Env, ph: number) => {
     const s = surf(env, ph), w = byPhase.get(ph)![s.next++], g = new Gfx(s.L.ctx, washEnv(env), 0, INK_M);
-    const paint = () => masked(g, w.hide, () => wet(g, w.pts, w.color, w));
+    const paint = () => masked(g, w.hide, () => (w.flat ? fillShape(g, w.pts, w.color, w.alpha) : wet(g, w.pts, w.color, w)));
     if (w.clip) clipped(g, w.clip, paint); else paint();
   };
   const washLayer = (env: Env, ph: number) => { const s = surf(env, ph), n = byPhase.get(ph)!.length; while (s.next < n) paintOne(env, ph); return s.L; };

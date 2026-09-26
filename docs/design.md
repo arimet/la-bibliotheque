@@ -24,7 +24,7 @@ p04 ─┬─ p05 Crater (+crystal) ─┬─ p07 The Pilot ─┐
 p09: star → p10 · crystal → p11 · revolver → p12
 ```
 
-The text lives in `src/app/story.ts`; `test/story.test.ts` walks every path with its inventory.
+The text lives in `src/stories/dust-creek.ts`; `test/story.test.ts` walks every path with its inventory.
 
 ## Look
 
@@ -44,7 +44,8 @@ small) and a title. The layout is full-screen immersive; on a phone held upright
 | `src/canvas-core/` | anidoodle's portable art core (Apache 2.0, see `NOTICE`) plus the book's pages |
 | `src/canvas-core/west.ts` | the book's kit: perspective, washes, stroke timing, `page()` → a two-shot film |
 | `src/canvas-core/pNN.ts` | one page's picture: strokes, washes, and an `anim` for what moves |
-| `src/app/` | the reader: `story.ts` (data), `player.ts` (canvas loop), `main.ts` (state, cards) |
+| `src/stories/` | each book's text and items, as a `Book` (`src/app/book.ts`) |
+| `src/app/` | the reader: `reader.ts` (state, cards), `player.ts` (canvas loop), one entry per book |
 | `tools/` | anidoodle's tools: `still.mjs`, `render.mjs`, `gate.mjs` |
 
 Every page film has two shots: `draw` (the picture makes itself) and `loop` (a seamless cycle). The
@@ -54,8 +55,9 @@ more than 0.6 scale, during the cheap pen-only frames; the ink stays at full res
 ## Commands
 
 ```bash
-npm run dev                                   # http://localhost:5180
-npm test                                      # story graph
+npm run dev                                   # http://localhost:5180: the shelf; /dust-creek/, /corbenic/
+npm test                                      # story graph, both books
+npm run covers                                # the shelf's covers, from each book's first page
 node tools/still.mjs p01 --shot loop --frame 150 --out out/p01.png
 node tools/render.mjs p01 && node tools/gate.mjs p01 --mp4 out/p01.mp4
 ```
@@ -66,3 +68,8 @@ node tools/render.mjs p01 && node tools/gate.mjs p01 --mp4 out/p01.mp4
   contract checks, and runs at about 60 fps in the reader on desktop and phone sizes (headless
   Chromium, no GPU).
 - **Next:** a page-by-page review.
+
+## The shelf
+
+The site's front page is a shelf (`www/index.html`) with one cover per book. Each book has its own
+page and bundle: `www/dust-creek/`, `www/corbenic/` (see `docs/corbenic-design.md`).

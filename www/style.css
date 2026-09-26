@@ -2,7 +2,7 @@
   --night: #1a120c; --gold: #c89a4b; --parch: #f1dfb8; --ink: #2b1a10; --warn: #f0a868;
   --card-bg: #1a120c; --card-edge: #c89a4b; --card-text: #f1dfb8;
 }
-body.blue { --night: #0b1f38; --gold: #9cc3f0; --parch: #e8f1ff; }
+.dust-creek:is([data-tone="1"], [data-tone="2"]) { --night: #0b1f38; --gold: #9cc3f0; --parch: #e8f1ff; }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--night); color: var(--parch); overflow: hidden; }
 body { font-family: "IM Fell English", Georgia, serif; }
@@ -51,19 +51,20 @@ body.band-hidden #show-band { display: block; }
 .card .need svg { width: 13px; height: 13px; vertical-align: -2px; }
 #text .found svg { width: 18px; height: 18px; vertical-align: -3px; }
 .card .need { font-family: "Special Elite", monospace; font-size: 12.5px; line-height: 1.2; color: var(--warn); margin-top: 3px; }
-.card.blue { --card-bg: #0b1f38; --card-edge: #9cc3f0; --card-text: #e8f1ff; }
+.dust-creek .card:is(.tone-1, .tone-2) { --card-bg: #0b1f38; --card-edge: #9cc3f0; --card-text: #e8f1ff; }
 .card.locked { cursor: not-allowed; }
 .card.locked .art, .card.locked .ttl, .card.locked .sub { filter: grayscale(.9) brightness(.6); } /* the reason it is locked stays bright */
 .card.locked:hover { transform: rotate(var(--r)); }
 .card.locked .art::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(-35deg, transparent 0 12px, rgba(0,0,0,.35) 12px 14px); }
 
-#to-gallery { position: fixed; top: 20px; left: 16px; z-index: 2; font-family: "Special Elite", monospace; font-size: 13px; color: var(--gold); text-decoration: none;
+#to-gallery, #to-shelf { position: fixed; top: 20px; left: 16px; z-index: 2; font-family: "Special Elite", monospace; font-size: 13px; color: var(--gold); text-decoration: none;
   padding: 6px 10px; border: 1px solid var(--gold); border-radius: 4px; background: color-mix(in srgb, var(--night) 70%, transparent); }
-#to-gallery:hover, #to-gallery:focus-visible { background: var(--night); }
+#to-gallery:hover, #to-gallery:focus-visible, #to-shelf:hover, #to-shelf:focus-visible { background: var(--night); }
+#to-shelf { top: 56px; }
 
 /* the gallery: every scene on one page */
 html.gallery-mode, html.gallery-mode body { overflow: auto; height: auto; }
-.gallery-mode #scene, .gallery-mode #band, .gallery-mode #satchel, .gallery-mode #to-gallery, .gallery-mode #show-band { display: none !important; }
+.gallery-mode #scene, .gallery-mode #band, .gallery-mode #satchel, .gallery-mode #to-gallery, .gallery-mode #to-shelf, .gallery-mode #show-band { display: none !important; }
 #gallery { padding: 32px max(16px, 4vw) 48px; max-width: 1500px; margin: 0 auto; }
 #gallery header { margin-bottom: 24px; }
 #gallery h1 { font-family: "Rye", serif; font-weight: normal; color: var(--gold); font-size: clamp(28px, 4vw, 44px); margin: 0 0 6px; }
@@ -74,13 +75,13 @@ html.gallery-mode, html.gallery-mode body { overflow: auto; height: auto; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 18px; }
 .tile { position: relative; display: block; aspect-ratio: 16 / 9; border: 2px solid var(--gold); border-radius: 6px; overflow: hidden; background: #0e0a07;
   color: #f1dfb8; text-decoration: none; box-shadow: 0 8px 18px rgba(0,0,0,.45); transition: transform .2s ease; }
-.tile.blue { border-color: #9cc3f0; }
+.dust-creek .tile:is(.tone-1, .tone-2) { border-color: #9cc3f0; }
 .tile:hover, .tile:focus-visible { transform: translateY(-4px); outline: none; }
 .tile:focus-visible { border-color: #fff; }
 .tile canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .tile .num, .tile .ttl, .tile .end { position: absolute; font-family: "Rye", serif; text-shadow: 0 1px 6px rgba(0,0,0,.9); }
 .tile .num { top: 8px; left: 10px; font-size: 15px; color: var(--gold); }
-.tile.blue .num { color: #9cc3f0; }
+.dust-creek .tile:is(.tone-1, .tone-2) .num { color: #9cc3f0; }
 .tile .ttl { left: 10px; right: 10px; bottom: 8px; font-size: 18px; }
 .tile .end { top: 8px; right: 10px; font-family: "Special Elite", monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
 .tile::after { content: ""; position: absolute; inset: 55% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.6)); pointer-events: none; }
@@ -90,7 +91,8 @@ html.gallery-mode, html.gallery-mode body { overflow: auto; height: auto; }
 @media (orientation: portrait) {
   html, body { overflow: auto; }
   #scene { position: relative; height: auto; aspect-ratio: 16 / 9; }
-  #to-gallery { top: 12px; left: 10px; font-size: 11px; padding: 4px 7px; }
+  #to-gallery, #to-shelf { top: 12px; left: 10px; font-size: 11px; padding: 4px 7px; }
+  #to-shelf { top: 42px; }
   #band { position: relative; flex-direction: column; align-items: stretch; padding: 18px 16px 28px; background: var(--night); }
   .story { max-width: none; max-height: none; overflow: visible; padding: 0; background: none; box-shadow: none; backdrop-filter: none; }
   #hide-band, #show-band { display: none !important; }
@@ -99,3 +101,33 @@ html.gallery-mode, html.gallery-mode body { overflow: auto; height: auto; }
   .card { width: 42vw; max-width: 156px; height: calc(min(42vw, 156px) * 1.68); }
 }
 @media (prefers-reduced-motion: reduce) { .card { animation: none; } #band { transition: none; } }
+
+/* Corbenic: gold on vellum, then verdigris, then blood */
+.corbenic { --night: #1c140b; --gold: #d2a94a; --parch: #f3e6c6; --card-bg: #1c140b; --card-edge: #d2a94a; --card-text: #f3e6c6; font-family: "EB Garamond", Georgia, serif; }
+.corbenic[data-tone="1"] { --night: #141a14; --gold: #8fae8c; --parch: #e4e6d4; }
+.corbenic[data-tone="2"] { --night: #170807; --gold: #c2463a; --parch: #f0dcd2; }
+.corbenic .card.tone-1 { --card-bg: #141a14; --card-edge: #8fae8c; --card-text: #e4e6d4; }
+.corbenic .card.tone-2 { --card-bg: #170807; --card-edge: #c2463a; --card-text: #f0dcd2; }
+.corbenic .tile.tone-1 { border-color: #8fae8c; }
+.corbenic .tile.tone-2 { border-color: #c2463a; }
+.corbenic #title, .corbenic .card .ttl, .corbenic .tile :is(.ttl, .end), .corbenic #gallery h1 { font-family: "Grenze Gotisch", serif; font-weight: 500; }
+/* roman numerals in a gothic hand are hard to tell apart */
+.corbenic :is(.card, .tile) .num { font-family: "EB Garamond", serif; font-weight: 600; letter-spacing: 1px; }
+
+/* the shelf: the site's front page, one cover per book */
+html:has(.shelf), .shelf { overflow: auto; height: auto; min-height: 100%; }
+.shelf main { max-width: 1080px; margin: 0 auto; padding: 48px 16px 64px; }
+.shelf h1 { font-family: "IM Fell English", Georgia, serif; font-weight: normal; font-size: clamp(32px, 5vw, 52px); color: var(--gold); margin: 0 0 6px; }
+.shelf .lede { margin: 0 0 32px; font-size: 18px; }
+.shelf .books { display: grid; gap: 28px; }
+@media (min-width: 720px) { .shelf .books { grid-template-columns: 1fr 1fr; } }
+.book { display: block; color: var(--parch); text-decoration: none; transition: transform .2s ease; }
+.book img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 2px solid var(--book); border-radius: 6px; }
+.book h2 { margin: 12px 0 2px; font-weight: normal; font-size: 28px; color: var(--book); }
+.book p { margin: 0; font-size: 17px; }
+.book:hover, .book:focus-visible { transform: translateY(-4px); outline: none; }
+.book:focus-visible img { border-color: #fff; }
+.book.dust { --book: #c89a4b; } .book.dust h2 { font-family: "Rye", serif; }
+.book.grail { --book: #d2a94a; } .book.grail h2 { font-family: "Grenze Gotisch", serif; font-weight: 500; font-size: 33px; }
+/* a manuscript page is shown whole, border and all, on the dark of the table */
+.corbenic #scene { object-fit: contain; }

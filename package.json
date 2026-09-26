@@ -5,12 +5,13 @@
   "type": "module",
   "description": "A choose-your-own-adventure western, every picture drawn in code with anidoodle.",
   "scripts": {
-    "dev": "esbuild src/app/main.ts --bundle --outfile=www/app.js --servedir=www --serve=5180",
-    "build": "esbuild src/app/main.ts --bundle --minify --outfile=www/app.js",
+    "dev": "esbuild src/app/dust-creek.ts src/app/corbenic.ts --bundle --outdir=www --entry-names=[name]/app --servedir=www --serve=5180",
+    "build": "esbuild src/app/dust-creek.ts src/app/corbenic.ts --bundle --minify --outdir=www --entry-names=[name]/app",
     "test": "node --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
     "still": "node tools/still.mjs",
-    "gate": "node tools/gate.mjs"
+    "gate": "node tools/gate.mjs",
+    "covers": "node tools/still.mjs p01 --shot loop --scale 0.5 --out out/cover-dust-creek.png && node tools/still.mjs c01 --shot loop --scale 0.5 --out out/cover-corbenic.png && for b in dust-creek corbenic; do sips -s format jpeg -s formatOptions 82 out/cover-$b.png --out www/covers/$b.jpg >/dev/null; done"
   },
   "dependencies": {
     "esbuild": "^0.25.0"
