@@ -47,8 +47,10 @@ export const SKIN = "#ecd0ad", DEAD = "#a3a58f", MAIL = "#8d949a";
 export type Shield = { field: string; mark?: string; ord?: "bend" | "cross" | "chevron" | "pale" | "lion" | "merlettes" };
 export type Look = {
   x: number; g: number; h: number; f?: 1 | -1; lean?: number;
-  robe: "long" | "tunic" | "armor" | "saddle"; // long: to the ground; tunic/armor: to the knee; saddle: sitting astride
-  head: "bare" | "hood" | "helm" | "crown" | "veil" | "coif";
+  // long: to the ground; tunic/armor: to the knee; saddle: sitting astride; suit: a jacket to the hip
+  // over trousers; dress: to the knee, bare legs; coat: a raincoat to the knee over trousers
+  robe: "long" | "tunic" | "armor" | "saddle" | "suit" | "dress" | "coat";
+  head: "bare" | "hood" | "helm" | "crown" | "veil" | "coif" | "hat" | "long";
   cloth: string; cloth2?: string; hair?: string; skin?: string; metal?: string; gold?: string;
   // upper arm, forearm angles in radians from hanging straight down, positive toward where the figure faces
   near?: [number, number]; far?: [number, number];
@@ -77,10 +79,10 @@ export const figure = (k: Look): Figure => {
   drawArm(farA);
 
   // the legs, for anything shorter than a gown
-  if (k.robe === "tunic" || k.robe === "armor") {
-    const legC = k.robe === "armor" ? metal : k.cloth2 ?? k.cloth;
-    add(Sp([[-0.065, 0.4], [-0.015, 0.4], [-0.02, 0.03], [-0.06, 0.03]]), legC, lw);
-    add(Sp([[0.015, 0.4], [0.065, 0.4], [0.055, 0.03], [0.015, 0.03]]), legC, lw);
+  if (k.robe === "tunic" || k.robe === "armor" || k.robe === "suit" || k.robe === "dress" || k.robe === "coat") {
+    const legC = k.robe === "armor" ? metal : k.robe === "dress" ? skin : k.cloth2 ?? k.cloth, top = k.robe === "suit" ? 0.5 : 0.4, lw0 = k.robe === "dress" ? 0.035 : 0.05;
+    add(Sp([[-0.015 - lw0, top], [-0.015, top], [-0.02, 0.03], [-0.02 - lw0 * 0.8, 0.03]]), legC, lw);
+    add(Sp([[0.015, top], [0.015 + lw0, top], [0.01 + lw0 * 0.9, 0.03], [0.015, 0.03]]), legC, lw);
     add(sample(Sp([[-0.07, 0.035], [-0.02, 0.035], [0.03, 0.012], [0.03, 0], [-0.07, 0]]), true, 3), "#3b2a20", lw * 0.8); // far foot
     add(sample(Sp([[0.01, 0.035], [0.06, 0.035], [0.11, 0.012], [0.11, 0], [0.01, 0]]), true, 3), "#3b2a20", lw * 0.8); // near foot
   }
@@ -89,11 +91,12 @@ export const figure = (k: Look): Figure => {
     add(sample(Sp([[0.06, 0.1], [0.12, 0.1], [0.17, 0.07], [0.16, 0.05], [0.06, 0.05]]), true, 3), "#3b2a20", lw * 0.8);
   }
   // the gown, the tunic or the surcoat
-  const hem = k.robe === "long" ? 0 : k.robe === "saddle" ? 0.42 : 0.36, flare = k.robe === "long" ? 0.19 : k.robe === "saddle" ? 0.16 : 0.13;
+  const hem = { long: 0, saddle: 0.42, suit: 0.45, dress: 0.32, coat: 0.28, tunic: 0.36, armor: 0.36 }[k.robe], flare = { long: 0.19, saddle: 0.16, suit: 0.11, dress: 0.15, coat: 0.15, tunic: 0.13, armor: 0.13 }[k.robe];
   if (k.robe === "armor") add(Sp([[-flare - 0.01, hem - 0.04], [flare + 0.01, hem - 0.04], [0.11, hem + 0.1], [-0.11, hem + 0.1]]), metal, lw); // mail below the surcoat
   const body = sample(Sp([[-flare, hem], [-(flare + 0.1) / 2 + 0.02, (hem + 0.55) / 2], [-0.075, 0.55], [-0.09, 0.7], [-0.105, 0.785], [-0.05, 0.83], [0.05, 0.83], [0.1, 0.785], [0.085, 0.7], [0.075, 0.55], [(flare + 0.1) / 2 - 0.02, (hem + 0.55) / 2], [flare, hem], [0.08, hem - 0.012], [-0.08, hem - 0.012]]), true, 3);
   add(body, k.cloth, lw * 1.1);
-  if (!k.lite) line({ pts: Sp([[-0.078, 0.555], [0, 0.545], [0.078, 0.555]]), w: lw }); // the belt
+  if (k.robe === "suit") { add(Sp([[-0.012, 0.82], [0.012, 0.82], [0.02, 0.6], [0, 0.57], [-0.02, 0.6]]), k.gold ?? "#8a2a2a", lw * 0.8); line({ pts: Sp([[-0.05, 0.83], [0.0, 0.66], [0.05, 0.83]]), w: lw }); }
+  else if (!k.lite) line({ pts: Sp([[-0.078, 0.555], [0, 0.545], [0.078, 0.555]]), w: lw }); // the belt
   line({ pts: Sp([[-0.02, 0.53], [-0.05, (hem + 0.53) / 2], [-flare * 0.55, hem + 0.01]]), w: lw * 0.8, op: 0.7 }); // folds
   line({ pts: Sp([[0.025, 0.53], [0.06, (hem + 0.53) / 2], [flare * 0.6, hem + 0.01]]), w: lw * 0.8, op: 0.7 });
 
@@ -113,6 +116,9 @@ export const figure = (k: Look): Figure => {
     add(sample(Sp([[hc[0] - 0.062, hc[1] - 0.08], [hc[0] - 0.066, hc[1] + 0.06], [hc[0] - 0.04, hc[1] + 0.085], [hc[0] + 0.05, hc[1] + 0.085], [hc[0] + 0.07, hc[1] + 0.06], [hc[0] + 0.074, hc[1] - 0.08]]), true, 2), metal, lw);
     line({ pts: Sp([[hc[0] + 0.0, hc[1] + 0.012], [hc[0] + 0.07, hc[1] + 0.012]]), w: lw * 1.6 }); // eye slit
     line({ pts: Sp([[hc[0] + 0.035, hc[1] + 0.08], [hc[0] + 0.035, hc[1] - 0.075]]), w: lw * 0.8 });
+  } else if (k.head === "long") {
+    add(sample(Sp([[hc[0] - 0.07, hc[1] + 0.04], [hc[0] - 0.02, hc[1] + 0.085], [hc[0] + 0.05, hc[1] + 0.06], [hc[0] + 0.06, hc[1] + 0.01], [hc[0] - 0.01, hc[1] - 0.02], [hc[0] - 0.02, 0.76], [hc[0] - 0.1, 0.74], [hc[0] - 0.09, hc[1] - 0.04]]), true, 4), hair, lw);
+    add(face, skin, lw);
   } else {
     add(oval(C[0] - f * 0.012 * h, C[1] - 0.012 * h, rx * 1.1, ry * 1.08, 16), hair, lw); // the hair shows round the back and top
     add(face, skin, lw);
@@ -124,6 +130,11 @@ export const figure = (k: Look): Figure => {
     else { line({ pts: [S(hc[0] + 0.02, hc[1] + 0.012), S(hc[0] + 0.038, hc[1] + 0.014)], w: lw * 1.2 }); line({ pts: [S(hc[0] + 0.025, hc[1] - 0.032), S(hc[0] + 0.042, hc[1] - 0.03)], w: lw * 0.8, op: 0.7 }); }
     line({ pts: [S(hc[0] + 0.052, hc[1] + 0.01), S(hc[0] + 0.062, hc[1] - 0.014), S(hc[0] + 0.05, hc[1] - 0.017)], w: lw * 0.8, op: 0.8 }); // the nose
     line({ pts: [S(hc[0] + 0.018, hc[1] + 0.03), S(hc[0] + 0.045, hc[1] + 0.034)], w: lw * 0.8, op: 0.7 }); // the brow
+  }
+  if (k.head === "hat") { // a fedora: the brim, the crown with its dent, the band
+    add(sample(Sp([[hc[0] - 0.1, hc[1] + 0.045], [hc[0] - 0.02, hc[1] + 0.06], [hc[0] + 0.11, hc[1] + 0.045], [hc[0] + 0.1, hc[1] + 0.03], [hc[0] - 0.09, hc[1] + 0.03]]), true, 3), k.cloth2 ?? "#4a4038", lw);
+    add(sample(Sp([[hc[0] - 0.058, hc[1] + 0.04], [hc[0] - 0.052, hc[1] + 0.105], [hc[0] - 0.01, hc[1] + 0.12], [hc[0] + 0.005, hc[1] + 0.11], [hc[0] + 0.02, hc[1] + 0.12], [hc[0] + 0.058, hc[1] + 0.105], [hc[0] + 0.062, hc[1] + 0.04]]), true, 3), k.cloth2 ?? "#4a4038", lw);
+    line({ pts: Sp([[hc[0] - 0.057, hc[1] + 0.055], [hc[0] + 0.061, hc[1] + 0.055]]), w: lw * 3, color: k.gold ?? "#2a2420" });
   }
   if (k.head === "crown") {
     const cy = hc[1] + 0.05, cr = Sp([[hc[0] - 0.058, cy], [hc[0] - 0.06, cy + 0.06], [hc[0] - 0.035, cy + 0.03], [hc[0] - 0.002, cy + 0.075], [hc[0] + 0.028, cy + 0.03], [hc[0] + 0.058, cy + 0.065], [hc[0] + 0.062, cy + 0.002], [hc[0] + 0.002, cy - 0.012]]);

@@ -72,4 +72,5 @@ node tools/render.mjs p01 && node tools/gate.mjs p01 --mp4 out/p01.mp4
 ## The shelf
 
 The site's front page is a shelf (`www/index.html`) with one cover per book. Each book has its own
-page and bundle: `www/dust-creek/`, `www/corbenic/` (see `docs/corbenic-design.md`).
+page and bundle: `www/dust-creek/`, `www/corbenic/` (see `docs/corbenic-design.md`), `www/canicule/`
+and `www/grands-bois/` (see `docs/canicule-grands-bois-design.md`).

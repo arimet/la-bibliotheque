@@ -3,3 +3,6 @@ Copyright 2026 Alex Greenshpun
 
 This product includes software developed as an original work,
 licensed under the Apache License, Version 2.0.
+
+src/canvas-core/press.ts ports the Risograph toolkit of anidoodle (riso.ts and the lighthouse
+plate): drums multiplied through registration offsets, halftone screens, riso inks.

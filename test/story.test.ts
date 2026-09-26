@@ -4,8 +4,10 @@ import assert from "node:assert/strict";
 import { pageIn, type Book } from "../src/app/book.ts";
 import { book as dustCreek } from "../src/stories/dust-creek.ts";
 import { book as corbenic } from "../src/stories/corbenic.ts";
+import { book as canicule } from "../src/stories/canicule.ts";
+import { book as grandsBois } from "../src/stories/grands-bois.ts";
 
-const BOOKS: Book[] = [dustCreek, corbenic];
+const BOOKS: Book[] = [dustCreek, corbenic, canicule, grandsBois];
 
 const walk = (b: Book) => {
   const seen = new Set<string>(), reached = new Set<string>(), stuck: string[] = [], queue: [string, string[]][] = [[b.start, b.startItems]];

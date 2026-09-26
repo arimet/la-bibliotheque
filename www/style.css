@@ -131,3 +131,26 @@ html:has(.shelf), .shelf { overflow: auto; height: auto; min-height: 100%; }
 .book.grail { --book: #d2a94a; } .book.grail h2 { font-family: "Grenze Gotisch", serif; font-weight: 500; font-size: 33px; }
 /* a manuscript page is shown whole, border and all, on the dark of the table */
 .corbenic #scene { object-fit: contain; }
+
+/* Canicule: riso inks on newsprint, pink and yellow, then blue night, then red */
+.canicule { --night: #1b1530; --gold: #ff48b0; --parch: #f5efe2; --card-bg: #1b1530; --card-edge: #ff48b0; --card-text: #f5efe2; font-family: "Courier Prime", "Courier New", monospace; }
+.canicule[data-tone="1"] { --night: #0e1a33; --gold: #4aa8ff; --parch: #eaf2ff; }
+.canicule[data-tone="2"] { --night: #1e0c12; --gold: #f15060; --parch: #fbe9ea; }
+.canicule .card.tone-1 { --card-bg: #0e1a33; --card-edge: #4aa8ff; --card-text: #eaf2ff; }
+.canicule .card.tone-2 { --card-bg: #1e0c12; --card-edge: #f15060; --card-text: #fbe9ea; }
+.canicule .tile.tone-1 { border-color: #4aa8ff; } .canicule .tile.tone-2 { border-color: #f15060; }
+.canicule #title, .canicule .card .ttl, .canicule .tile :is(.num, .ttl), .canicule #gallery h1 { font-family: "Anton", sans-serif; font-weight: normal; text-transform: uppercase; letter-spacing: 1px; }
+.canicule #text p { font-size: clamp(14px, 1.05vw, 17px); }
+
+/* Les Grands Bois: pencils on cream paper, autumn, then night, then deeper night */
+.grands-bois { --night: #2a2118; --gold: #e0a458; --parch: #f6eedc; --card-bg: #2a2118; --card-edge: #e0a458; --card-text: #f6eedc; font-family: "Nunito", system-ui, sans-serif; }
+.grands-bois[data-tone="1"] { --night: #141c2e; --gold: #9fb4e0; --parch: #e8ecf6; }
+.grands-bois[data-tone="2"] { --night: #0e1424; --gold: #c7b3e0; --parch: #ece8f6; }
+.grands-bois .card.tone-1 { --card-bg: #141c2e; --card-edge: #9fb4e0; --card-text: #e8ecf6; }
+.grands-bois .card.tone-2 { --card-bg: #0e1424; --card-edge: #c7b3e0; --card-text: #ece8f6; }
+.grands-bois .tile.tone-1 { border-color: #9fb4e0; } .grands-bois .tile.tone-2 { border-color: #c7b3e0; }
+.grands-bois #title, .grands-bois .card .ttl, .grands-bois .tile :is(.num, .ttl), .grands-bois #gallery h1 { font-family: "Caveat", cursive; font-weight: 600; }
+.grands-bois #title { font-size: clamp(28px, 3vw, 38px); }
+.grands-bois .card .ttl { font-size: 21px; }
+.book.riso { --book: #ff48b0; } .book.riso h2 { font-family: "Anton", sans-serif; font-weight: normal; text-transform: uppercase; letter-spacing: 1px; }
+.book.pencil { --book: #e0a458; } .book.pencil h2 { font-family: "Caveat", cursive; font-weight: 600; font-size: 36px; }
