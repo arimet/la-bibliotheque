@@ -6,3 +6,6 @@ licensed under the Apache License, Version 2.0.
 
 src/canvas-core/press.ts ports the Risograph toolkit of anidoodle (riso.ts and the lighthouse
 plate): drums multiplied through registration offsets, halftone screens, riso inks.
+
+src/canvas-core/paintedOilKit.ts, sumiEKit.ts and brokenColourKit.ts are anidoodle's oil,
+process-runner and broken-colour kits, unchanged except where a file header notes an adaptation.
