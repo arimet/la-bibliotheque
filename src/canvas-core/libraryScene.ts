@@ -13,7 +13,10 @@ import { W, H, F, PAINT, JOURNEY, TABLE, SLOTS, EYE as EYE_Y, FAR, RINGS, TABLE_
 
 // ---------------------------------------------------------------- the seated eye
 // Y up from the table top, Z away from the reader along the table, X across; metres.
-const EYE = 0.45, TILT = (33 * Math.PI) / 180, FOC = 900, CT = Math.cos(TILT), ST = Math.sin(TILT);
+const EYE = 0.45, TILT = (33 * Math.PI) / 180, CT = Math.cos(TILT), ST = Math.sin(TILT);
+export const FOC = 900;
+// a point of the table's world in the seated eye's own frame: across, up the screen, away from the eye
+export const eyeSpace = (X: number, Y: number, Z: number): [number, number, number] => { const dy = Y - EYE; return [X, dy * CT + Z * ST, -dy * ST + Z * CT]; };
 export const proj = (X: number, Y: number, Z: number): P => { const dy = Y - EYE, zc = -dy * ST + Z * CT, yc = dy * CT + Z * ST; return [W / 2 + (FOC * X) / zc, H / 2 - (FOC * yc) / zc]; };
 // the point of the plane at height Y seen at screen (x, y)
 export const unproj = (x: number, y: number, Y: number): [number, number] => { const a = (x - W / 2) / FOC, b = -(y - H / 2) / FOC, s = (Y - EYE) / (b * CT - ST); return [s * a, s * (b * ST + CT)]; };
@@ -76,7 +79,12 @@ export const faces = (b: Book): Face[] => [
   ...([0, 1] as const).filter((u) => sees(b, u)).map((u): Face => ({ kind: u ? "fore" : "spine", pts: [bp(b, u, 0, 1), bp(b, u, 1, 1), bp(b, u, 1, 0), bp(b, u, 0, 0)] })),
 ];
 export const faceAt = (f: P[], s: number, h: number): P => lerp2(lerp2(f[0], f[1], s), lerp2(f[3], f[2], s), h);
-const silhouette = (b: Book) => hull([...cover(b), bp(b, 0, 1, 0), bp(b, 1, 1, 0), bp(b, 0, 0, 0), bp(b, 1, 0, 0)]);
+export const silhouette = (b: Book) => hull([...cover(b), bp(b, 0, 1, 0), bp(b, 1, 1, 0), bp(b, 0, 0, 0), bp(b, 1, 0, 0)]);
+// the place a book takes on the table: its silhouette grown by r px (it is convex, so each corner moves
+// out from the centre), so it also covers the strokes that ran a little past the book's edges
+export const footprint = (b: Book, r = 3): P[] => { const s = silhouette(b), cx = s.reduce((a, p) => a + p[0], 0) / s.length, cy = s.reduce((a, p) => a + p[1], 0) / s.length; return s.map(([x, y]) => { const l = Math.hypot(x - cx, y - cy); return [x + ((x - cx) / l) * r, y + ((y - cy) / l) * r] as P; }); };
+// the book's own pictures on the front page (its lifted copy, the place it leaves): the box round its footprint, in whole px
+export const spriteBox = (b: Book) => { const s = footprint(b), xs = s.map((p) => p[0]), ys = s.map((p) => p[1]); return [Math.floor(Math.min(...xs)) - 2, Math.floor(Math.min(...ys)) - 2, Math.ceil(Math.max(...xs)) + 2, Math.ceil(Math.max(...ys)) + 2] as const; };
 export const SPINE = 0.1;
 // the plate: 16:9, 70 % of the board's width, a little below the title
 export const plateBox = (b: Book) => { const pw = 0.7, ph = (pw * b.w * 9) / 16 / b.d, u0 = SPINE + (1 - SPINE - pw) / 2, v0 = 0.4; return [u0, v0, u0 + pw, v0 + ph] as const; };
@@ -278,7 +286,9 @@ export type Art = { run: (ctx: Ctx, f: number, env: Env) => void; end: number; w
 // a style: its paintings of the cards (far, ring, bustsAL/AR/BL/BR, table), the ground under them,
 // the lit air of the nave, the canvas laid over the whole frame, and the tint of the lamp's light
 export type Lamp = { glow: [string, string]; mote: string[]; tongue: [string, string, string] };
-export type Look = { id: string; title: string; art: Record<string, Art>; under: string; air: string; canvas: (ctx: Ctx, env: Env) => void; lamp: Lamp };
+// a Room is what the style lays under, between and over its cards; a Look adds the paintings
+export type Room = { id: string; under: string; air: string; canvas: (ctx: Ctx, env: Env) => void; lamp: Lamp };
+export type Look = Room & { title: string; art: Record<string, Art> };
 const cardEnv = (env: Env, a: Art): Env => ({ ...env, W: a.w, H: a.h });
 // a card half painted: its painting run into the card's own surface at frame f
 const live = (L: Look, env: Env, id: string, f: number): Img[] => {
@@ -287,11 +297,15 @@ const live = (L: Look, env: Env, id: string, f: number): Img[] => {
   S.ctx.setTransform(1, 0, 0, 1, 0, 0); S.ctx.clearRect(0, 0, S.canvas.width, S.canvas.height);   // a card of dabs alone is not opaque: last frame's must not show through
   a.run(S.ctx, f, cardEnv(env, a)); return [S.canvas];
 };
-// a card finished, with its halvings: a card drawn small is taken from the nearest halving above its size, so it is filtered, not sampled
+// a card with its halvings: a card drawn small is taken from the nearest halving above its size, so it is filtered, not sampled
+export const halvings = (env: Env, top: Img): Img[] => {
+  const lv = [top]; while (lv[lv.length - 1].width > 96) { const s = lv[lv.length - 1], l = env.canvas(Math.ceil(s.width / 2), Math.ceil(s.height / 2)); l.ctx.imageSmoothingEnabled = true; l.ctx.imageSmoothingQuality = "high"; l.ctx.drawImage(s, 0, 0, l.canvas.width, l.canvas.height); lv.push(l.canvas); }
+  return lv;
+};
+// a card finished
 const finished = (L: Look, env: Env, id: string): Img[] => {
   const a = L.art[id], key = `${L.id}:card:${id}:${env.scale}`; let lv = env.cache.get(key) as Img[] | undefined; if (lv) return lv;
-  const S = env.canvas(Math.round(a.w * env.scale), Math.round(a.h * env.scale)); a.run(S.ctx, a.end, cardEnv(env, a)); lv = [S.canvas];
-  while (lv[lv.length - 1].width > 96) { const s = lv[lv.length - 1], l = env.canvas(Math.ceil(s.width / 2), Math.ceil(s.height / 2)); l.ctx.imageSmoothingEnabled = true; l.ctx.imageSmoothingQuality = "high"; l.ctx.drawImage(s, 0, 0, l.canvas.width, l.canvas.height); lv.push(l.canvas); }
+  const S = env.canvas(Math.round(a.w * env.scale), Math.round(a.h * env.scale)); a.run(S.ctx, a.end, cardEnv(env, a)); lv = halvings(env, S.canvas);
   env.cache.set(key, lv); return lv;
 };
 // one card on its own, finished, at env.scale: what a baker writes to an image file. Every style has
@@ -309,28 +323,34 @@ export const PARTS: Record<string, { art: string; x: number; y: number; w: numbe
   ...Object.fromEntries(["A", "B"].map((v) => [`ring${v}`, [{ art: "ring", ...RC }, { art: `busts${v}L`, ...ov(-1) }, { art: `busts${v}R`, ...ov(1) }]])),
 };
 const clear = (d: number) => Math.exp(-Math.max(0, d - 5) / 30);
-const composite = (ctx: Ctx, env: Env, cam: Cam, L: Look, layers: (id: string) => Img[]) => {
-  const k = env.scale; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "low";   // the halvings do the filtering
-  ctx.fillStyle = L.under; ctx.fillRect(0, 0, Math.round(W * k), Math.round(H * k));
-  const air = (a: number, b: number[]) => { if (a < 0.003) return; ctx.globalAlpha = a; ctx.fillStyle = L.air; ctx.fillRect(b[0] * k, b[1] * k, (b[2] - b[0]) * k, (b[3] - b[1]) * k); ctx.globalAlpha = 1; };
+// `layers` gives each card with its halvings: painted by the film, or baked images on the front page
+export type Layers = (id: string) => Img[];
+// `vp` is the rect of film px the canvas shows, [x0, y0, x1, y1]: the frame for the films; on the front
+// page the part of it a screen shows, or more of the room round it on a phone held upright
+export type Rect = [number, number, number, number];
+const FRAME: Rect = [0, 0, W, H];
+export const composite = (ctx: Ctx, env: Env, cam: Cam, L: Room, layers: Layers, vp: Rect = FRAME) => {
+  const k = env.scale, [X0, Y0, X1, Y1] = vp; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "low";   // the halvings do the filtering
+  ctx.fillStyle = L.under; ctx.fillRect(0, 0, Math.round((X1 - X0) * k), Math.round((Y1 - Y0) * k));
+  const air = (a: number, b: number[]) => { if (a < 0.003) return; ctx.globalAlpha = a; ctx.fillStyle = L.air; ctx.fillRect((b[0] - X0) * k, (b[1] - Y0) * k, (b[2] - b[0]) * k, (b[3] - b[1]) * k); ctx.globalAlpha = 1; };
   let last = -1;
   for (const c of ORDER) {
     const p = project(c, cam); if (!p) continue;
     const d = c.z - cam.z, x0 = p.x - (c.w * p.s) / 2, y0 = p.y - (c.h * p.s) / 2, x1 = x0 + c.w * p.s, y1 = y0 + c.h * p.s;
-    const vx0 = Math.max(0, x0), vy0 = Math.max(0, y0), vx1 = Math.min(W, x1), vy1 = Math.min(H, y1); if (vx1 <= vx0 || vy1 <= vy0) continue;
+    const vx0 = Math.max(X0, x0), vy0 = Math.max(Y0, y0), vx1 = Math.min(X1, x1), vy1 = Math.min(Y1, y1); if (vx1 <= vx0 || vy1 <= vy0) continue;
     // the air between this card and the last: only where this card will not cover it (a ring that fills the screen shows the rest through its opening only)
-    if (last >= 0) { const ring = c.id !== "table" && c.id !== "far" && x0 <= 0 && y0 <= 0 && x1 >= W && y1 >= H; air(1 - clear(last) / clear(d), ring ? [Math.max(0, p.x - A1 * p.s), Math.max(0, p.y - (archY(0) - c.y) * p.s), Math.min(W, p.x + A1 * p.s), Math.min(H, p.y + c.y * p.s)] : [0, 0, W, H]); }
+    if (last >= 0) { const ring = c.id !== "table" && c.id !== "far" && x0 <= X0 && y0 <= Y0 && x1 >= X1 && y1 >= Y1; air(1 - clear(last) / clear(d), ring ? [Math.max(X0, p.x - A1 * p.s), Math.max(Y0, p.y - (archY(0) - c.y) * p.s), Math.min(X1, p.x + A1 * p.s), Math.min(Y1, p.y + c.y * p.s)] : vp); }
     for (const q of PARTS[c.id]) {
       const qx0 = p.x + (q.x - q.w / 2 - c.x) * p.s, qy0 = p.y - (q.y + q.h / 2 - c.y) * p.s, qx1 = qx0 + q.w * p.s, qy1 = qy0 + q.h * p.s;
-      const ux0 = Math.max(0, qx0), uy0 = Math.max(0, qy0), ux1 = Math.min(W, qx1), uy1 = Math.min(H, qy1); if (ux1 <= ux0 || uy1 <= uy0) continue;
+      const ux0 = Math.max(X0, qx0), uy0 = Math.max(Y0, qy0), ux1 = Math.min(X1, qx1), uy1 = Math.min(Y1, qy1); if (ux1 <= ux0 || uy1 <= uy0) continue;
       const lv = layers(q.art); let img = lv[0]; for (const l of lv) if (l.width / q.w >= p.s * k) img = l;
       const u = img.width / (qx1 - qx0), v = img.height / (qy1 - qy0);
-      ctx.drawImage(img, (ux0 - qx0) * u, (uy0 - qy0) * v, (ux1 - ux0) * u, (uy1 - uy0) * v, ux0 * k, uy0 * k, (ux1 - ux0) * k, (uy1 - uy0) * k);
+      ctx.drawImage(img, (ux0 - qx0) * u, (uy0 - qy0) * v, (ux1 - ux0) * u, (uy1 - uy0) * v, (ux0 - X0) * k, (uy0 - Y0) * k, (ux1 - ux0) * k, (uy1 - uy0) * k);
     }
     last = d;
   }
-  if (last >= 0) air(1 - clear(last), [0, 0, W, H]);
-  L.canvas(ctx, env);
+  if (last >= 0) air(1 - clear(last), vp);
+  L.canvas(ctx, vp === FRAME ? env : { ...env, W: X1 - X0, H: Y1 - Y0 });
 };
 
 // ---------------------------------------------------------------- the table, live
@@ -338,14 +358,14 @@ const composite = (ctx: Ctx, env: Env, cam: Cam, L: Look, layers: (id: string) =
 // in its light and the flame breathes; every motion makes whole cycles over the loop.
 const loop = (f: number, n: number, ph = 0) => Math.sin((2 * Math.PI * n * f) / TABLE + ph);
 const MOTES = (() => { const r = rng(77); return Array.from({ length: 72 }, () => ({ x: FLAME[0] - 220 + r() * 600, y: FLAME[1] - 40 + r() * 440, ax: 8 + r() * 22, n: 1 + Math.floor(r() * 3), rise: 1 + Math.floor(r() * 2), ph: r() * 6.283, k: r(), size: 0.8 + r() * 1.8 })); })();
-const endView = (ctx: Ctx, env: Env, L: Look) => {
-  const key = `${L.id}:end:${env.scale}`; let S = env.cache.get(key) as { canvas: Img; ctx: Ctx } | undefined;
-  if (!S) { S = env.canvas(Math.round(W * env.scale), Math.round(H * env.scale)); composite(S.ctx, env, camAt(JOURNEY), L, (id) => finished(L, env, id)); env.cache.set(key, S); }
+export const endView = (ctx: Ctx, env: Env, L: Room, layers: Layers, vp: Rect = FRAME) => {
+  const key = `${L.id}:end:${env.scale}:${vp}`; let S = env.cache.get(key) as { canvas: Img; ctx: Ctx } | undefined;
+  if (!S) { S = env.canvas(Math.round((vp[2] - vp[0]) * env.scale), Math.round((vp[3] - vp[1]) * env.scale)); composite(S.ctx, env, camAt(JOURNEY), L, layers, vp); env.cache.set(key, S); }
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; ctx.drawImage(S.canvas, 0, 0);
 };
-const lampLive = (ctx: Ctx, f: number, env: Env, T: Lamp) => {
+export const lampLive = (ctx: Ctx, f: number, env: Env, T: Lamp, vp: Rect = FRAME) => {
   const k = env.scale, [fx, fy] = FLAME, fl = 0.5 * loop(f, 29, 1) + 0.3 * loop(f, 47, 2.3) + 0.2 * loop(f, 71, 0.4);
-  ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalCompositeOperation = "screen";
+  ctx.setTransform(k, 0, 0, k, -vp[0] * k, -vp[1] * k); ctx.globalCompositeOperation = "screen";
   const g = ctx.createRadialGradient(fx, fy, 0, fx, fy, 170); g.addColorStop(0, `rgba(${T.glow[0]},${(0.22 + 0.1 * fl).toFixed(3)})`); g.addColorStop(0.35, `rgba(${T.glow[1]},${(0.08 + 0.05 * fl).toFixed(3)})`); g.addColorStop(1, `rgba(${T.glow[1]},0)`);
   ctx.fillStyle = g; ctx.fillRect(fx - 170, fy - 170, 340, 340);
   // the motes: each drifts up through the light and fades at both ends of its climb, so the loop has no seam
@@ -368,6 +388,6 @@ export const libraryFilm = (L: Look): Film => ({
   shots: [
     { id: "paint", start: 0, end: PAINT, draw: (ctx, f, env) => composite(ctx, env, camAt(0), L, (id) => (f >= L.art[id].end ? finished(L, env, id) : live(L, env, id, f))) },
     { id: "journey", start: PAINT, end: PAINT + JOURNEY, draw: (ctx, f, env) => composite(ctx, env, camAt(f), L, (id) => finished(L, env, id)) },
-    { id: "table", start: PAINT + JOURNEY, end: PAINT + JOURNEY + TABLE, draw: (ctx, f, env) => { endView(ctx, env, L); lampLive(ctx, f, env, L.lamp); } },
+    { id: "table", start: PAINT + JOURNEY, end: PAINT + JOURNEY + TABLE, draw: (ctx, f, env) => { endView(ctx, env, L, (id) => finished(L, env, id)); lampLive(ctx, f, env, L.lamp); } },
   ],
 });

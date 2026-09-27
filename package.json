@@ -5,13 +5,14 @@
   "type": "module",
   "description": "A choose-your-own-adventure western, every picture drawn in code with anidoodle.",
   "scripts": {
-    "dev": "esbuild src/app/dust-creek.ts src/app/corbenic.ts src/app/canicule.ts src/app/grands-bois.ts --bundle --outdir=www --entry-names=[name]/app --servedir=www --serve=5180",
-    "build": "esbuild src/app/dust-creek.ts src/app/corbenic.ts src/app/canicule.ts src/app/grands-bois.ts --bundle --minify --outdir=www --entry-names=[name]/app",
+    "dev": "esbuild src/app/dust-creek.ts src/app/corbenic.ts src/app/canicule.ts src/app/grands-bois.ts src/app/library.ts --bundle --outdir=www --entry-names=[name]/app --servedir=www --serve=5180",
+    "build": "esbuild src/app/dust-creek.ts src/app/corbenic.ts src/app/canicule.ts src/app/grands-bois.ts src/app/library.ts --bundle --minify --outdir=www --entry-names=[name]/app",
     "test": "node --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
     "still": "node tools/still.mjs",
+    "library": "node tools/bake-library.mjs",
     "gate": "node tools/gate.mjs",
-    "covers": "node tools/still.mjs p01 --shot loop --scale 0.5 --out out/cover-dust-creek.png && node tools/still.mjs c01 --shot loop --scale 0.5 --out out/cover-corbenic.png && node tools/still.mjs r01 --shot loop --scale 0.5 --out out/cover-canicule.png && node tools/still.mjs f01 --shot loop --scale 0.5 --out out/cover-grands-bois.png && for b in dust-creek corbenic canicule grands-bois; do sips -s format jpeg -s formatOptions 82 out/cover-$b.png --out www/covers/$b.jpg >/dev/null; done && node tools/still.mjs p01 --shot loop --out out/plate-dust-creek.png && node tools/still.mjs c01 --shot loop --out out/plate-corbenic.png && node tools/still.mjs r01 --shot loop --out out/plate-canicule.png && node tools/still.mjs f01 --shot loop --out out/plate-grands-bois.png && for b in dust-creek corbenic canicule grands-bois; do sips -s format jpeg -s formatOptions 80 out/plate-$b.png --out www/covers/$b-plate.jpg >/dev/null; done"
+    "covers": "node tools/still.mjs p01 --shot loop --out out/plate-dust-creek.png && node tools/still.mjs c01 --shot loop --out out/plate-corbenic.png && node tools/still.mjs r01 --shot loop --out out/plate-canicule.png && node tools/still.mjs f01 --shot loop --out out/plate-grands-bois.png && for b in dust-creek corbenic canicule grands-bois; do sips -s format jpeg -s formatOptions 80 out/plate-$b.png --out www/covers/$b-plate.jpg >/dev/null && cwebp -quiet -q 85 -m 6 out/plate-$b.png -o www/covers/$b-plate.webp; done"
   },
   "dependencies": {
     "esbuild": "^0.25.0"

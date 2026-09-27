@@ -67,4 +67,7 @@ export const reader = (book: Book, film: (p: Page) => PageFilm) => {
   addEventListener("keydown", (e) => { if (e.key.toLowerCase() === "h" && drawn && !e.metaKey && !e.ctrlKey) hideBand(!document.body.classList.contains("band-hidden")); });
   addEventListener("hashchange", () => show(location.hash.slice(1)));
   show(location.hash.slice(1) || book.start);
+  // come from the library's dive: page 1 is the picture the visitor dived into, so it is already drawn
+  // (the plate the page laid under it, index.html, goes once the canvas is drawn over it: the player's frame comes first)
+  if (new URLSearchParams(location.search).get("from") === "library") { (current as ReturnType<typeof play> | null)?.finish(); history.replaceState(null, "", location.pathname + location.hash); requestAnimationFrame(() => document.documentElement.classList.remove("landing")); }
 };

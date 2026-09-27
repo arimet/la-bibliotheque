@@ -3,11 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script>/* come from the library's dive: its last frame holds until the reader has drawn page 1, the same picture. The first frame waits
+     for the reader's (#drawn, after app.js); before any, the plate lies under the page where the canvas will show it (style.css, reader.ts) */
+    if (/[?&]from=library/.test(location.search)) { const r = document.documentElement, l = Object.assign(document.createElement("link"), { rel: "expect", href: "#drawn" }); l.setAttribute("blocking", "render"); document.head.append(l); r.classList.add("landing"); r.style.cssText = `--plate: url(${new URL("../covers/dust-creek-plate.webp", location.href)}); --night: #1a120c`; }</script>
   <title>Dust Creek</title>
   <meta name="description" content="Un livre dont vous êtes le héros, dessiné en code : un western qui tourne mal, ou très bien.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rye&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+  <!-- a page to another crossfades: the library's dive ends on the picture its book starts on. Inline, not in style.css:
+       Chromium drops the opt-in of a page whose first frame waits on a script when the rule comes from a linked sheet -->
+  <style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body class="dust-creek">
@@ -22,5 +28,6 @@
   </section>
   <button id="show-band" type="button">Afficher le texte</button>
   <script src="app.js"></script>
+  <i id="drawn" hidden></i>
 </body>
 </html>

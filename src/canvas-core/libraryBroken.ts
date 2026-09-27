@@ -1,6 +1,7 @@
 import { fractal, rng, type Ctx, type Env, type P } from "./core";
-import { brush, checkOps, css, fromHsl, linen, mixC, schedule, staged, toHsl, type Mark, type Op, type RGB } from "./brokenColourKit";
+import { brush, checkOps, css, fromHsl, mixC, schedule, staged, toHsl, type Mark, type Op, type RGB } from "./brokenColourKit";
 import { clamp, inside } from "./gallery";
+import { BROKEN_ROOM } from "./libraryRooms";
 import { W, H, EYE as EYE_Y } from "./longroom";
 import {
   BOOKS, BANDS, EDGE, FLAME, HOLES, LA, LAMP, LS, SPINE, chim, plateEdges, TOP, along, bp, boardLight, brassI, faces, grain, inBox, inChimney, labelBox, lerp2, onBook, plateBox,
@@ -378,10 +379,6 @@ const ART: Record<string, Art> = {
   ...Object.fromEntries([0, 1].flatMap((v) => [-1, 1].map((s) => { const id = `busts${"AB"[v]}${s > 0 ? "R" : "L"}`; const [ox, oy] = ovAt(s); return [id, card(id, OW, OH, [-ox, -oy], bustPasses(v, s), false)]; }))),
   table: card("table", TW, H, [PAD, 0], tablePasses, true, (c, env) => cut(c, env, TABLE_KEEP)),
 };
-const BROKEN: Look = {
-  id: "libraryBroken", title: "La Bibliothèque · la galerie, couleur brisée", art: ART, under: "#b49cc6", air: "#f0dccb",
-  canvas: (ctx, env) => linen(ctx, env, 0.26),
-  lamp: { glow: ["250,180,100", "240,130,110"], mote: ["#fff4d0", "#ffc27e", "#f9b4c2"], tongue: ["#ffc860", "#fff6d8", "rgba(255,250,232,0)"] },
-};
+const BROKEN: Look = { ...BROKEN_ROOM, title: "La Bibliothèque · la galerie, couleur brisée", art: ART };
 export const libraryBroken = libraryFilm(BROKEN);
 export const libraryBrokenCards = cardsOf(BROKEN);   // each card on its own, finished: { w, h, paint(env) }

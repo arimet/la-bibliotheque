@@ -1,7 +1,8 @@
-import { Gfx, rng, fractal, type Medium, type P } from "./core";
+import { Gfx, rng, fractal, type P } from "./core";
 import { bounds, clamp, inside, mix } from "./gallery";
 import { fit, runProcess, timeline, type Proc } from "./sumiEKit";
 import { darken, fill, lighten, oilStroke, weave, type OStroke } from "./paintedOilKit";
+import { OIL_M, OIL_ROOM } from "./libraryRooms";
 import { W, H, EYE as EYE_Y } from "./longroom";
 import {
   BOOKS as SCENE, BANDS, EDGE, FLAME, HOLES, LA, LAMP, LAMP_SHADOW, LS, PILASTERS, chim, edgeAt, plateEdges, SHADOWS, SPINE, TOP, along, bp, boardLight, brassI, shadowK, cover, faceAt, faces, flameGlow, grain, inBox, inChimney,
@@ -33,7 +34,6 @@ import {
 // left between them; the leather with a medium brush laid across each board; a small brush for the
 // page edges, the bands and the gilt only.
 
-const OIL_M: Medium = { nib: 1, taper: 1, pressure: 1, retrace: false, wobble: 0, rough: 0 };
 
 // ---------------------------------------------------------------- colour
 const ramp = (stops: string[], t: number) => { const f = clamp(t) * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(f)); return mix(stops[i], stops[i + 1], f - i); };
@@ -454,7 +454,7 @@ const farStages = (): Stage[] => {
 };
 
 // ---------------------------------------------------------------- the table card
-// Task 3's painting, cut to the table, its near edge and the lamp; the bays painted behind it are
+// The reading-table painting (`tableStages`), cut to the table, its near edge and the lamp; the bays painted behind it are
 // dropped, and the gallery shows there instead. The table runs out of that frame at its near corners,
 // so the card is widened by PAD on each side and the table's own passes carry on into the margin:
 // only a rub and the dark front are added out there, so the frame keeps its approved pixels. PAD is
@@ -476,6 +476,6 @@ const ART: Record<string, Art> = {
   ...Object.fromEntries([0, 1].flatMap((v) => [-1, 1].map((s) => [`busts${"AB"[v]}${s > 0 ? "R" : "L"}`, art(`busts${"AB"[v]}${s > 0 ? "R" : "L"}`, bustStages(v, s), OW, OH, (g) => cut(g.main, g.env, OV_KEEP(v, s)))]))),
   table: art("table", tableCard(), TW, H, (g) => cut(g.main, g.env, TABLE_KEEP)),
 };
-const OIL: Look = { id: "libraryOil", title: "La Bibliothèque · la galerie, huile", art: ART, under: BAYS[1], air: "#9c8a6c", canvas: (ctx, env) => weave(new Gfx(ctx, env, 0, OIL_M), 0.3), lamp: { glow: ["255,196,120", "240,150,70"], mote: ["#ffe0a8"], tongue: ["#ffd27a", "#fff2c8", "rgba(255,246,216,0)"] } };
+const OIL: Look = { ...OIL_ROOM, title: "La Bibliothèque · la galerie, huile", art: ART };   // the room's ground is BAYS[1]
 export const libraryOil = libraryFilm(OIL);
 export const libraryOilCards = cardsOf(OIL);   // each card on its own, finished: { w, h, paint(env) }

@@ -30,11 +30,14 @@ export const play = (canvas: HTMLCanvasElement, film: PageFilm, onDrawn: () => v
   canvas.width = Math.round(film.meta.W * scale); canvas.height = Math.round(film.meta.H * scale);
   const skip = matchMedia("(prefers-reduced-motion: reduce)").matches, spf = 1000 / film.meta.fps;
   warm(env);
-  let t0 = performance.now() - (skip ? drawEnd * spf : 0), last = -1, raf = 0, told = false;
+  let t0 = performance.now(), last = -1, raf = 0, told = false, finished = skip;
   const tick = (now: number) => {
     let f = Math.floor((now - t0) / spf);
+    // a finished drawing starts its loop, whatever the frame's clock says (it can be older than the
+    // call that finished it: a frame's time is when it began, before a long script ran)
+    if (finished) { if (f < drawEnd) { f = drawEnd; t0 = now - f * spf; } }
     // while the picture is being drawn, a slow device draws it slower rather than skipping marks
-    if (f < drawEnd && f > last + 2) { f = last + 2; t0 = now - f * spf; }
+    else if (f < drawEnd && f > last + 2) { f = last + 2; t0 = now - f * spf; }
     const frame = f < drawEnd ? f : drawEnd + ((f - drawEnd) % loopLen);
     if (frame !== last) { renderFrame(film, ctx, frame, env); last = frame; }
     // spend what is left of this frame's budget painting washes that will be needed later
@@ -45,7 +48,7 @@ export const play = (canvas: HTMLCanvasElement, film: PageFilm, onDrawn: () => v
   raf = requestAnimationFrame(tick);
   return {
     // a tap on the picture finishes the drawing at once
-    finish: () => { const now = performance.now(); if ((now - t0) / 1000 * film.meta.fps < drawEnd) t0 = now - (drawEnd / film.meta.fps) * 1000; },
+    finish: () => { finished = true; },
     stop: () => cancelAnimationFrame(raf),
   };
 };

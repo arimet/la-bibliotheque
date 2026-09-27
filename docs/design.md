@@ -69,8 +69,10 @@ node tools/render.mjs p01 && node tools/gate.mjs p01 --mp4 out/p01.mp4
   Chromium, no GPU).
 - **Next:** a page-by-page review.
 
-## The shelf
+## The library
 
-The site's front page is a shelf (`www/index.html`) with one cover per book. Each book has its own
-page and bundle: `www/dust-creek/`, `www/corbenic/` (see `docs/corbenic-design.md`), `www/canicule/`
-and `www/grands-bois/` (see `docs/canicule-grands-bois-design.md`).
+The site's front page (`www/index.html`, `src/app/library.ts`) is a painted library: the camera travels
+down a Long Room to a reading table where the four books lie, and a click opens one on its first
+picture and dives into it before the book's reader takes over. See `docs/library-design.md`. Each book
+has its own page and bundle: `www/dust-creek/`, `www/corbenic/` (see `docs/corbenic-design.md`),
+`www/canicule/` and `www/grands-bois/` (see `docs/canicule-grands-bois-design.md`).

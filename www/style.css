@@ -7,6 +7,8 @@
 html, body { margin: 0; height: 100%; background: var(--night); color: var(--parch); overflow: hidden; }
 body { font-family: "IM Fell English", Georgia, serif; }
 
+/* come from the library's dive (index.html): its plate under the page, placed like the canvas's picture, until the reader draws over it */
+html.landing { background: var(--plate) center / var(--fit, cover) no-repeat var(--night); } html.landing body { background: transparent; }
 #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; object-fit: cover; cursor: pointer; display: block; }
 
 #satchel { position: fixed; top: 14px; right: 16px; display: flex; gap: 8px; z-index: 2; }
@@ -91,6 +93,7 @@ html.gallery-mode, html.gallery-mode body { overflow: auto; height: auto; }
 @media (orientation: portrait) {
   html, body { overflow: auto; }
   #scene { position: relative; height: auto; aspect-ratio: 16 / 9; }
+  html.landing { background-position: top; background-size: 100% auto; }
   #to-gallery, #to-shelf { top: 12px; left: 10px; font-size: 11px; padding: 4px 7px; }
   #to-shelf { top: 42px; }
   #band { position: relative; flex-direction: column; align-items: stretch; padding: 18px 16px 28px; background: var(--night); }
@@ -114,21 +117,6 @@ html.gallery-mode, html.gallery-mode body { overflow: auto; height: auto; }
 /* roman numerals in a gothic hand are hard to tell apart */
 .corbenic :is(.card, .tile) .num { font-family: "EB Garamond", serif; font-weight: 600; letter-spacing: 1px; }
 
-/* the shelf: the site's front page, one cover per book */
-html:has(.shelf), .shelf { overflow: auto; height: auto; min-height: 100%; }
-.shelf main { max-width: 1080px; margin: 0 auto; padding: 48px 16px 64px; }
-.shelf h1 { font-family: "IM Fell English", Georgia, serif; font-weight: normal; font-size: clamp(32px, 5vw, 52px); color: var(--gold); margin: 0 0 6px; }
-.shelf .lede { margin: 0 0 32px; font-size: 18px; }
-.shelf .books { display: grid; gap: 28px; }
-@media (min-width: 720px) { .shelf .books { grid-template-columns: 1fr 1fr; } }
-.book { display: block; color: var(--parch); text-decoration: none; transition: transform .2s ease; }
-.book img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 2px solid var(--book); border-radius: 6px; }
-.book h2 { margin: 12px 0 2px; font-weight: normal; font-size: 28px; color: var(--book); }
-.book p { margin: 0; font-size: 17px; }
-.book:hover, .book:focus-visible { transform: translateY(-4px); outline: none; }
-.book:focus-visible img { border-color: #fff; }
-.book.dust { --book: #c89a4b; } .book.dust h2 { font-family: "Rye", serif; }
-.book.grail { --book: #d2a94a; } .book.grail h2 { font-family: "Grenze Gotisch", serif; font-weight: 500; font-size: 33px; }
 /* a manuscript page is shown whole, border and all, on the dark of the table */
 .corbenic #scene { object-fit: contain; }
 
@@ -152,5 +140,78 @@ html:has(.shelf), .shelf { overflow: auto; height: auto; min-height: 100%; }
 .grands-bois #title, .grands-bois .card .ttl, .grands-bois .tile :is(.num, .ttl), .grands-bois #gallery h1 { font-family: "Caveat", cursive; font-weight: 600; }
 .grands-bois #title { font-size: clamp(28px, 3vw, 38px); }
 .grands-bois .card .ttl { font-size: 21px; }
-.book.riso { --book: #ff48b0; } .book.riso h2 { font-family: "Anton", sans-serif; font-weight: normal; text-transform: uppercase; letter-spacing: 1px; }
-.book.pencil { --book: #e0a458; } .book.pencil h2 { font-family: "Caveat", cursive; font-weight: 600; font-size: 36px; }
+
+/* the library: the site's front page, a painted Long Room and its reading table */
+.library { --night: #120c08; }
+.library #hall { position: fixed; left: 0; top: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity .7s ease; }
+.library #hall.ready { opacity: 1; }
+.library header { position: fixed; top: 16px; left: 18px; z-index: 2; pointer-events: none; text-shadow: 0 1px 8px rgba(0,0,0,.8); }
+.library h1 { margin: 0; font-weight: normal; font-size: 22px; color: var(--gold); letter-spacing: .5px; }
+.library .lede { margin: 2px 0 0; font-size: 14px; opacity: .8; }
+.library .books { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+/* each book a link over its painted self: the hit area is its silhouette, the ring its outline */
+.library .book { position: absolute; left: 0; top: 0; display: block; color: var(--parch); text-decoration: none; outline: none; }
+.library .book svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.library .book polygon { fill: transparent; stroke: none; }
+.library.at-table:not(.diving) .book polygon { pointer-events: all; cursor: pointer; }
+.library .book:focus-visible polygon { stroke: #fff4d8; stroke-width: 2; stroke-linejoin: round; filter: drop-shadow(0 0 3px rgba(0,0,0,.9)); }
+.library .cap { position: absolute; left: 50%; top: calc(100% + 10px); width: max-content; max-width: 230px; transform: translateX(-50%); text-align: center;
+  font-size: 15px; line-height: 1.25; text-shadow: 0 1px 6px #000, 0 0 2px #000; opacity: 0; transition: opacity .2s ease; pointer-events: none; }
+.library .cap b { display: block; font-weight: normal; font-size: 21px; color: var(--book); }
+.library .book:is(:hover, :focus-visible) .cap { opacity: 1; }
+.library.diving .cap { opacity: 0 !important; }
+.book.dust { --book: #e0b060; } .book.dust b { font-family: "Rye", serif; font-size: 19px; }
+.book.grail { --book: #e2b85a; } .book.grail b { font-family: "Grenze Gotisch", serif; font-weight: 500; font-size: 24px; }
+.book.riso { --book: #ff6cc0; } .book.riso b { font-family: "Anton", sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+.book.pencil { --book: #f0b468; } .book.pencil b { font-family: "Caveat", cursive; font-weight: 600; font-size: 27px; }
+.library .controls { position: fixed; right: 16px; bottom: 16px; z-index: 2; display: flex; gap: 8px; }
+.library .controls button { font: 12px "Special Elite", monospace; color: var(--gold); cursor: pointer; padding: 5px 9px; border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent); border-radius: 4px;
+  background: color-mix(in srgb, var(--night) 70%, transparent); }
+.library .controls button:hover, .library .controls button:focus-visible { background: var(--night); border-color: var(--gold); }
+.library .controls button:focus-visible { outline: 2px solid #fff4d8; outline-offset: 2px; }
+.library .controls button[hidden] { display: none; }
+.library #style span { opacity: .5; } .library #style[aria-pressed="false"] .oil, .library #style[aria-pressed="true"] .broken { opacity: 1; }
+.library.diving :is(header, .controls) { opacity: 0; transition: opacity .3s ease; }
+/* no room (no JS, or its pictures failed to load): the four books as a plain list, in their own letters */
+.library.plain { overflow: auto; }
+.library.plain :is(#hall, .controls, .book svg) { display: none; }
+.library.plain :is(header, .books) { position: static; max-width: 34em; margin: 0 auto; padding: 56px 20px 0; text-align: left; pointer-events: auto; }
+.library.plain .books { display: grid; gap: 26px; padding-top: 36px; padding-bottom: 56px; }
+.library.plain .book { position: static; }
+.library.plain .cap { position: static; display: block; width: auto; max-width: none; transform: none; text-align: left; font-size: 17px; opacity: 1; pointer-events: auto; }
+.library.plain .cap b { margin-bottom: 3px; }
+.library.plain .book:hover b { text-decoration: underline; text-underline-offset: 4px; }
+.library.plain .book:focus-visible { outline: 2px solid #fff4d8; outline-offset: 6px; border-radius: 2px; }
+/* the dive: the book built again in CSS 3D, a box that rises, opens, riffles its leaves and grows into its first picture */
+.dive { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+.dive :is(.tome, .cover, .rb, .lb, .leaf, .st) { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform-style: preserve-3d; }
+.dive :is(i, .front, .page) { position: absolute; left: 0; top: 0; display: block; transform-origin: 0 0; backface-visibility: hidden; }
+/* the boards' edges and the spine, in the cover's own leather; the page block's edges, leaf on leaf */
+.dive .lea { background: linear-gradient(color-mix(in srgb, var(--leather) 80%, #000), color-mix(in srgb, var(--leather) 62%, #000)); }
+.dive .spine { background: linear-gradient(to right, color-mix(in srgb, var(--leather) 45%, #000), color-mix(in srgb, var(--leather) 85%, #000) 40%, color-mix(in srgb, var(--leather) 60%, #000)); }
+.dive .ed { background: linear-gradient(rgba(70,50,25,.08), rgba(70,50,25,.4)), repeating-linear-gradient(#ece0c0, #ad9a70 3px, #ece0c0 6px); }   /* darker toward the back board */
+.dive .ed.v { background: linear-gradient(to right, rgba(70,50,25,.08), rgba(70,50,25,.4)), repeating-linear-gradient(to right, #ece0c0, #ad9a70 3px, #ece0c0 6px); }
+/* the paste-down inside the front cover, the leather turned in round it */
+.dive .pd { background: linear-gradient(to left, #b9a47e, #e6d6b2 10%, #eadcbc); box-shadow: inset 0 0 0 12px var(--leather); }
+/* a page: the paper darkening into the gutter, printed lines between its margins, a drop cap on some. It is cut in strips, each
+   given its slice (--x from the page's left edge; --W its width): the right page's (its spine on the left, like a recto), a leaf's
+   recto and verso, the left pile's top (a verso). ::after is the shade a turning strip takes, or the shadow a leaf casts on it */
+.dive .pg { overflow: hidden; background: linear-gradient(to right, #8c7450, #c4ae87 14px, #ecdcba 40px, #f3e6c8 64px) calc(0px - var(--x)) 0 / 64px 100% no-repeat, #f3e6c8; }
+.dive .page img { position: absolute; box-shadow: 0 0 0 1px rgba(60,40,20,.35); }
+.dive .tx { --lines: repeating-linear-gradient(rgba(84,70,52,.5) 0 6px, transparent 6px 17px); overflow: hidden;
+  background: var(--lines) calc(var(--m0) - var(--x)) 64px / calc(var(--W) - var(--m0) - var(--m1)) calc(100% - 160px) no-repeat,
+    linear-gradient(to var(--to), #8c7450, #c4ae87 14px, #e8d9b8 40px, #f1e6cb 64px) calc(0px - var(--x)) 0 / calc(var(--W) + 2px) 100% no-repeat, #f1e6cb; }
+.dive .re { --m0: 52px; --m1: 42px; --to: right; } .dive .vo { --m0: 42px; --m1: 52px; --to: left; }
+.dive :is(.tx, .pg)::after { content: ""; position: absolute; inset: 0; background: #22150a; opacity: 0; }
+.dive .dc::before { content: "L"; position: absolute; left: calc(50px - var(--x)); top: 58px; width: 60px; height: 62px; padding-left: 2px; background: #f1e6cb; color: #7a2418; font: 64px/1 "IM Fell English", Georgia, serif; }
+/* a phone held upright: the room is a band across the screen (library.ts), the title over it in the dark */
+@media (orientation: portrait) {
+  .library header { top: auto; left: 16px; right: 16px; bottom: calc(100% - var(--band, 40%) + 20px); text-align: center; }
+  .library h1 { font-size: 30px; } .library .lede { font-size: 15px; margin-top: 6px; }
+  .library .cap { max-width: 150px; font-size: 13px; } .library .cap b { font-size: 17px; }
+}
+/* a touch screen has no hover to name a book: at the table each shows its title under it, no wider than itself */
+@media (hover: none) {
+  .library.at-table .cap { opacity: 1; font-size: 0; top: calc(100% + 6px); max-width: 100%; }
+  .library.at-table .cap b { font-size: 16px; line-height: 1.1; } .library.at-table .book.pencil b { font-size: 20px; line-height: .9; }
+}
