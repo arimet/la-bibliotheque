@@ -55,9 +55,9 @@ more than 0.6 scale, during the cheap pen-only frames; the ink stays at full res
 ## Commands
 
 ```bash
-npm run dev                                   # http://localhost:5180: the shelf; /dust-creek/, /corbenic/
-npm test                                      # story graph, both books
-npm run covers                                # the shelf's covers, from each book's first page
+npm run dev                                   # http://localhost:5180: the library; /dust-creek/, /corbenic/, …
+npm test                                      # story graph of every book, the camera, the baked images
+npm run covers                                # each book's first picture, for the library
 node tools/still.mjs p01 --shot loop --frame 150 --out out/p01.png
 node tools/render.mjs p01 && node tools/gate.mjs p01 --mp4 out/p01.mp4
 ```
@@ -67,7 +67,6 @@ node tools/render.mjs p01 && node tools/gate.mjs p01 --mp4 out/p01.mp4
 - **Done:** all twelve pages are drawn and animated. Each passes the anidoodle determinism and
   contract checks, and runs at about 60 fps in the reader on desktop and phone sizes (headless
   Chromium, no GPU).
-- **Next:** a page-by-page review.
 
 ## The library
 
