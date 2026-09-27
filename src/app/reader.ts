@@ -48,6 +48,8 @@ export const reader = (book: Book, film: (p: Page) => PageFilm) => {
     renderSatchel();
     document.body.dataset.tone = String(toneOf(p));
     document.title = `${p.title} · ${book.name}`;
+    // a card played at the foot of a phone's page opens the next at its picture: on a phone the body is what scrolls
+    scrollTo(0, 0); document.body.scrollTop = 0; (band.querySelector(".story") as HTMLElement).scrollTop = 0;
     band.classList.remove("in"); hand.innerHTML = "";
     title.textContent = `${ROMAN[p.n]}. ${p.title}`;
     text.innerHTML = p.text.map((t) => `<p>${t}</p>`).join("") + (p.gives ? `<p class="found">Tu gardes ${book.items[p.gives].icon} ${book.items[p.gives].name}.</p>` : "") + (p.ending ? `<p class="found">Fin.</p>` : "");
